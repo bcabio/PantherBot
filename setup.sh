@@ -1,5 +1,5 @@
 #!/bin/bash
 pip install --upgrade -r requirements.txt
-mkdir logs
-mkdir secrets
-mkdir config
+mkdir -p logs
+mkdir -p secrets
+mkdir -p config
