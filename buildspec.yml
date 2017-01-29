@@ -3,5 +3,5 @@ version: 0.1
 phases:
   build:
     commands:
-      - docker build pantherbot .
+      - docker build -t pantherbot .
       - docker run -d pantherbot
