@@ -1,9 +1,15 @@
-FROM mhijazi1/pantherbot-env
+FROM debian:wheezy-slim
 
-COPY . /PantherBot
-WORKDIR /PantherBot
+RUN apt-get update; apt-get install -y \
+	build-essential \
+	libssl-dev \
+	libffi-dev \
+	python-dev \
+	python-pip \
+	git
 
-RUN ./setup.sh
-
+RUN pip install --upgrade pip
+RUN pip install urllib3[secure]
 EXPOSE 80
-CMD ./start.sh
+
+CMD git clone http://github.com/pantherhackers/PantherBot; cd ./PantherBot; ./setup.sh; ./start.sh
