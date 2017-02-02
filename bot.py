@@ -335,7 +335,7 @@ if __name__ == "__main__":
 
     # load config files
     ADMIN = os.environ.get('ADMIN_LIST')
-    if admin is None:
+    if ADMIN is None:
         print "PantherBot:LOG:Loading config files"
         filename = "config/admin.txt"
         script_dir = os.path.dirname(__file__)
