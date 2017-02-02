@@ -12,4 +12,4 @@ RUN pip install --upgrade pip
 RUN pip install urllib3[secure]
 EXPOSE 80
 
-CMD git clone http://github.com/pantherhackers/PantherBot; cd ./PantherBot; ./setup.sh; ./start.sh
+CMD git clone -b ${branch:-master} http://github.com/pantherhackers/PantherBot; cd ./PantherBot; ./setup.sh; ./start.sh
