@@ -3,5 +3,4 @@ version: 0.1
 phases:
   build:
     commands:
-      - docker build -t pantherbot .
-      - docker run -d pantherbot
+      - docker run -d -e branch=$BRANCH -e ADMIN_LIST=$ADMIN_LIST -e SLACK_SECRET=$SLACK_SECRET mhijazi1/pantherbot
