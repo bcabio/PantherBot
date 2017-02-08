@@ -71,6 +71,8 @@ global LOGC
 LOGC = []
 global pbCooldown
 pbCooldown = 100
+global pug_urls
+pug_urls=[]
 
 
 # function that is called whenever there is an event, including status changes, join messages, typing status, emoji reactions, everything  # noqa: 501
@@ -84,6 +86,9 @@ def on_message(ws, message):
     pbCooldown += 1
     global LOG
     global LOGC
+
+    # Resupplies supply of pug urls if needed
+    checkPugURLSupply()
 
     # Checks if the event type returned by Slack is a message
     if "message" == response["type"]:
@@ -114,6 +119,11 @@ def on_message(ws, message):
             "users.list",
         )
 
+def checkPugURLSupply():
+    print'checking pug supplies'
+    if len(pug_urls)<15:
+        #import scripts/pugbomb
+        pug_urls=pugbomb.callingallpugs()
 
 def commandMessage(response):
     # Checks if message starts with an exclamation point, and does the respective task  # noqa: 501
