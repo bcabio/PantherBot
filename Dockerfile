@@ -10,6 +10,12 @@ RUN apt-get update; apt-get install -y \
 
 RUN pip install --upgrade pip
 RUN pip install urllib3[secure]
+
+COPY ./ ./PantherBot
+WORKDIR ./PantherBot
+RUN ./setup.sh 
+
 EXPOSE 80
 
-CMD git clone -b ${branch:-master} http://github.com/pantherhackers/PantherBot; cd ./PantherBot; ./setup.sh; ./start.sh
+
+CMD ./start.sh
