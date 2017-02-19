@@ -1,6 +1,7 @@
 FROM debian:wheezy-slim
 
 RUN apt-get update; apt-get install -y \
+	sudo \
 	build-essential \
 	libssl-dev \
 	libffi-dev \
@@ -12,7 +13,6 @@ RUN pip install --upgrade pip
 RUN pip install urllib3[secure]
 
 ENV SLACK_SECRET '%SLACK_SECRET%'
-
 COPY ./ ./PantherBot
 WORKDIR ./PantherBot
 RUN ./setup.sh 
