@@ -3,6 +3,9 @@ import pandas
 from collections import Counter
 from sqlalchemy import create_engine
 import os
+#top_users random 10
+#top_users all 10 --emoji
+#top_users random --emoji
 engine = create_engine('mysql://{}:{}@{}'.format(os.environ["DB_USERNAME"], os.environ["DB_PASSWORD"], os.environ["DB_CONNECTION_STRING"]), echo=False)
 def stats(response, args):
     if args[0] == 'time':
@@ -11,6 +14,16 @@ def stats(response, args):
         return generate_time_graph(args[2::], args[1])
 
     if args[0] == 'top_users':
+        get_emoji_stats = False
+        channel = args[1]
+        index = 3
+        try:
+            index = int(args[3])
+        except ValueError:
+            get_emoji_stats = True
+
+        collect_top_users(index, channel, get_emoji_stats)
+
         pass
 
     if args[0] == 'emoji':
@@ -50,3 +63,8 @@ def generate_time_graph(range, channel='all'):
     df.columns.name = 'Hour'
     return [str(df)]
  
+
+def collect_top_users(index, channel, get_emoji_stats):
+
+
+
