@@ -14,15 +14,19 @@ def stats(response, args):
         return generate_time_graph(args[2::], args[1])
 
     if args[0] == 'top_users':
-        get_emoji_stats = False
+        emoji_stats = {"execute": False, "get_type": None}
         channel = args[1]
         index = 3
         try:
             index = int(args[3])
         except ValueError:
-            get_emoji_stats = True
+            emoji_stats["execute"] = True
+            if args[4] == "given" or args[4] == "received":
+                emoji_stats["get_type"] = args[4]
+            else:
+                return ["Please stop being stupid"]
 
-        collect_top_users(index, channel, get_emoji_stats)
+        collect_top_users(index, channel, emoji_stats)
 
         pass
 
@@ -65,6 +69,8 @@ def generate_time_graph(range, channel='all'):
  
 
 def collect_top_users(index, channel, get_emoji_stats):
-    if get_emoji_stats = False:
+    if get_emoji_stats:
+        top_users
+    else:
         top_users = engine.execute("Select first_name, last_name, topCommenters.comment_count FROM ( SELECT from_user_id, comment_count FROM commentActivity WHERE to_channel_id = %s ) as topCommenters LEFT JOIN users ON topCommenters.from_user_id = users.slack_id ORDER BY comment_count desc limit %s" channel, index)
-    
+
