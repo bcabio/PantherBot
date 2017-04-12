@@ -65,6 +65,6 @@ def generate_time_graph(range, channel='all'):
  
 
 def collect_top_users(index, channel, get_emoji_stats):
-
-
-
+    if get_emoji_stats = False:
+        top_users = engine.execute("Select first_name, last_name, topCommenters.comment_count FROM ( SELECT from_user_id, comment_count FROM commentActivity WHERE to_channel_id = %s ) as topCommenters LEFT JOIN users ON topCommenters.from_user_id = users.slack_id ORDER BY comment_count desc limit %s" channel, index)
+    
