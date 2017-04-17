@@ -119,7 +119,7 @@ def collect_top_users(index, channel, get_emoji_stats):
             bar_graph.set_xlabel('Users')
             bar_graph.set_ylabel('Score')
             plt.tight_layout()
-            plt.savefig('myfile.pdf')
+            plt.savefig('/tmp/myfile.pdf')
         else:
             print 2
             top_users = engine.execute("""SELECT first_name, last_name, topCommenters.comment_count 
