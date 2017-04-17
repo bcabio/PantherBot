@@ -106,23 +106,20 @@ def collect_top_users(index, channel, get_emoji_stats):
 
 
             received_names = [x[0]+" "+x[1] for x in top_given]
-            received_scores = [x[2] for x in top_given]
+            received_scores = [int(x[2]) for x in top_given]
             given_names = [x[0]+" "+x[1] for x in top_given]
-            given_scores = [x[2] for x in top_given]
+            given_scores = [int(x[2]) for x in top_given]
 
             print str(len(received_names))+" "+str(len(given_names))
 
-            if len(received_names) != len(given_names):
-                for i in xrange(0, index):
-                    print i
-                    if received_names[i] == received_names[-1]:
-                        received_names.append("")
-                        received_scores.append("")
-                    if given_names[i] == given_names[-1]:
-                        given_names.append("")
-                        given_scores.append("")
-            df = pandas.DataFrame({'Top Givers':given_names, 'gScore':given_scores, 'Top Receivers':received_names, "rScore":received_scores})
-
+            given_df = pandas.DataFrame({'Top Givers':given_names[::-1], 'Score':given_scores[::-1]})
+            received_df = pandas.DataFrame({'Top Receivers':received_names[::-1], "rScore":received_scores[::-1]})
+            
+            bar_graph = given_df.plot(x='Top Givers', y='Score', kind='barh', legend=False, title='SomeTitle')
+            bar_graph.set_xlabel('Users')
+            bar_graph.set_ylabel('Score')
+            plt.tight_layout()
+            plt.savefig('myfile.pdf')
         else:
             print 2
             top_users = engine.execute("""SELECT first_name, last_name, topCommenters.comment_count 
@@ -140,6 +137,6 @@ def collect_top_users(index, channel, get_emoji_stats):
     except Exception as e:
         print e
 
-    print str(df)
-    return [str(df)]
+    print str(given_df)
+    return [str(given_df)]
 
