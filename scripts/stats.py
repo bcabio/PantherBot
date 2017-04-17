@@ -1,11 +1,13 @@
 import datetime
 import pandas
+import matplotlib.pyplot as plt
 from collections import Counter
 from sqlalchemy import create_engine
 import os
-#top_users random 10
-#top_users all 10 --emoji
-#top_users random --emoji
+#top_users random 10 :)
+#top_users all 10 --emoji :( No results
+#top_users random --emoji :( Results are odd [('Harsha', 'Goli', Decimal('7')), ('Mo', '', Decimal('1'))]
+#top_users random 10 --emoji :( Results are odd [('Harsha', 'Goli', Decimal('7')), ('Mo', '', Decimal('1'))]
 engine = create_engine('mysql://{}:{}@{}'.format(os.environ["DB_USERNAME"], os.environ["DB_PASSWORD"], os.environ["DB_CONNECTION_STRING"]), echo=False)
 def stats(response, args):
     if args[0] == 'time':
@@ -14,19 +16,25 @@ def stats(response, args):
         return generate_time_graph(args[2::], args[1])
 
     if args[0] == 'top_users':
-        emoji_stats = {"execute": False, "get_type": None}
-        channel = args[1]
-        index = 3
+        print 'we here'
         try:
-            index = int(args[3])
-        except ValueError:
-            emoji_stats["execute"] = True
-            if args[4] == "given" or args[4] == "received":
-                emoji_stats["get_type"] = args[4]
-            else:
-                return ["Please stop being stupid"]
+            emoji_stats = False
+            channel = args[1]
+            index = 3
+            try:
+                index = int(args[2])
+                if args[-1] == "--emoji":
+                    emoji_stats = True
+            except ValueError:
+                if args[2] == "--emoji":
+                    emoji_stats = True
+                else:
+                    return ["Please stop being stupid"]
 
-        collect_top_users(index, channel, emoji_stats)
+        except Exception as e:
+            print e
+        print "calling"
+        return collect_top_users(index, channel, emoji_stats)
 
         pass
 
@@ -69,8 +77,69 @@ def generate_time_graph(range, channel='all'):
  
 
 def collect_top_users(index, channel, get_emoji_stats):
-    if get_emoji_stats:
-        top_users
-    else:
-        top_users = engine.execute("Select first_name, last_name, topCommenters.comment_count FROM ( SELECT from_user_id, comment_count FROM commentActivity WHERE to_channel_id = %s ) as topCommenters LEFT JOIN users ON topCommenters.from_user_id = users.slack_id ORDER BY comment_count desc limit %s" channel, index)
+    try:
+        if get_emoji_stats == True:
+            print 1
+            top_given = engine.execute("""SELECT u.first_name, u.last_name, SUM(ea.given_count) totalGiven 
+                FROM emojiActivity ea 
+                JOIN users u 
+                ON ea.from_user_id = u.slack_id 
+                WHERE ea.in_channel_id = (
+                    SELECT slack_id 
+                    FROM channels 
+                    WHERE name = %s) 
+                GROUP BY u.first_name, u.last_name 
+                ORDER BY totalGiven desc limit %s""", 
+                channel, index).fetchall()
+
+            top_received = engine.execute("""SELECT u.first_name, u.last_name, SUM(ea.given_count) totalReceived 
+                FROM emojiActivity ea 
+                JOIN users u 
+                ON ea.to_user_id = u.slack_id 
+                WHERE ea.in_channel_id = (
+                    SELECT slack_id 
+                    FROM channels 
+                    WHERE name = %s) 
+                GROUP BY u.first_name, u.last_name 
+                ORDER BY totalReceived desc limit %s""", 
+                channel, index).fetchall()
+
+
+            received_names = [x[0]+" "+x[1] for x in top_given]
+            received_scores = [x[2] for x in top_given]
+            given_names = [x[0]+" "+x[1] for x in top_given]
+            given_scores = [x[2] for x in top_given]
+
+            print str(len(received_names))+" "+str(len(given_names))
+
+            if len(received_names) != len(given_names):
+                for i in xrange(0, index):
+                    print i
+                    if received_names[i] == received_names[-1]:
+                        received_names.append("")
+                        received_scores.append("")
+                    if given_names[i] == given_names[-1]:
+                        given_names.append("")
+                        given_scores.append("")
+            df = pandas.DataFrame({'Top Givers':given_names, 'gScore':given_scores, 'Top Receivers':received_names, "rScore":received_scores})
+
+        else:
+            print 2
+            top_users = engine.execute("""SELECT first_name, last_name, topCommenters.comment_count 
+                FROM (
+                    SELECT from_user_id, comment_count 
+                    FROM commentActivity 
+                    WHERE to_channel_id = (
+                        SELECT slack_id 
+                        FROM channels 
+                        WHERE name = %s)) as topCommenters 
+                LEFT JOIN users 
+                ON topCommenters.from_user_id = users.slack_id 
+                ORDER BY comment_count desc limit %s""", 
+                channel, index)
+    except Exception as e:
+        print e
+
+    print str(df)
+    return [str(df)]
 
