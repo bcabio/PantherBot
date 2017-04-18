@@ -140,3 +140,19 @@ def collect_top_users(index, channel, get_emoji_stats):
     print str(given_df)
     return [str(given_df)]
 
+def upload_to_slack(filepath, file_name, file_type):
+    print 'PantherBot:LOG:Beginning file upload to Slack'
+    my_file = {'file' : (file_name, open(filepath, 'rb'), file_type)}
+    payload={
+              "filename":"myfile.pdf", 
+              "token":"xoxp-112432628209-170519375364-170581262869-d9c68a368b1865babe1b09ea8d6ca309", 
+              "channels":['#random'], 
+            }
+
+    resp = requests.post("https://slack.com/api/files.upload", params=payload, files=my_file)
+    if resp.text['ok'] == False:
+        print 'PantherBot:LOG:Upload Failed'
+    else:
+        print 'PantherBot:LOG:Upload Success'
+
+
