@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from collections import Counter
 from sqlalchemy import create_engine
 import os
+import requests
 #top_users random 10 :)
 #top_users all 10 --emoji :( No results
 #top_users random --emoji :( Results are odd [('Harsha', 'Goli', Decimal('7')), ('Mo', '', Decimal('1'))]
