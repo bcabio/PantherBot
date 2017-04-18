@@ -89,7 +89,7 @@ def collect_top_users(index, channel, get_emoji_stats):
                     FROM channels 
                     WHERE name = %s) 
                 GROUP BY u.first_name, u.last_name 
-                ORDER BY totalGiven desc limit %s""", 
+                ORDER BY totalGiven ASC limit %s""", 
                 channel, index).fetchall()
 
             top_received = engine.execute("""SELECT u.first_name, u.last_name, SUM(ea.given_count) totalReceived 
@@ -101,10 +101,10 @@ def collect_top_users(index, channel, get_emoji_stats):
                     FROM channels 
                     WHERE name = %s) 
                 GROUP BY u.first_name, u.last_name 
-                ORDER BY totalReceived desc limit %s""", 
+                ORDER BY totalReceived ASC limit %s""", 
                 channel, index).fetchall()
 
-
+            print top_given
             received_names = [x[0]+" "+x[1] for x in top_given]
             received_scores = [int(x[2]) for x in top_given]
             given_names = [x[0]+" "+x[1] for x in top_given]
@@ -112,8 +112,8 @@ def collect_top_users(index, channel, get_emoji_stats):
 
             print str(len(received_names))+" "+str(len(given_names))
 
-            given_df = pandas.DataFrame({'Top Givers':given_names[::-1], 'Score':given_scores[::-1]})
-            received_df = pandas.DataFrame({'Top Receivers':received_names[::-1], "rScore":received_scores[::-1]})
+            given_df = pandas.DataFrame({'Top Givers':given_names, 'Score':given_scores})
+            received_df = pandas.DataFrame({'Top Receivers':received_names, "rScore":received_scores})
             
             bar_graph = given_df.plot(x='Top Givers', y='Score', kind='barh', legend=False, title='SomeTitle')
             bar_graph.set_xlabel('Users')
