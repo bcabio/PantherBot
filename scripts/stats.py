@@ -7,10 +7,10 @@ from sqlalchemy import create_engine
 import time
 import os
 import requests
-#top_users random 10 :)
-#top_users all 10 --emoji :( No results
-#top_users random --emoji :( Results are odd [('Harsha', 'Goli', Decimal('7')), ('Mo', '', Decimal('1'))]
-#top_users random 10 --emoji :( Results are odd [('Harsha', 'Goli', Decimal('7')), ('Mo', '', Decimal('1'))]
+#top_users random 10 :) graph increment problem
+#top_users all 10 --emoji :) second graph increments by int 5
+#top_users random --emoji :( Default index is stuck at 3. Should change to 10
+#top_users random 10 --emoji :)
 engine = create_engine('mysql://{}:{}@{}'.format(os.environ["DB_USERNAME"], os.environ["DB_PASSWORD"], os.environ["DB_CONNECTION_STRING"]), echo=False)
 def stats(response, args):
     if args[0] == 'time':
@@ -19,11 +19,10 @@ def stats(response, args):
         return generate_time_graph(args[2::], args[1])
 
     if args[0] == 'top_users':
-        print 'we here'
         try:
             emoji_stats = False
             channel = args[1]
-            index = 3
+            index = 10
             try:
                 index = int(args[2])
                 if args[-1] == "--emoji":
@@ -36,7 +35,6 @@ def stats(response, args):
 
         except Exception as e:
             print e
-        print "calling"
         return collect_top_users(index, channel, emoji_stats)
 
         pass
@@ -77,7 +75,6 @@ def generate_time_graph(range, channel='all'):
     df = pandas.DataFrame({'Count':count}, index=hour)
     df.columns.name = 'Hour'
     return [str(df)]
- 
 
 def collect_top_users(index, channel, get_emoji_stats):
     if get_emoji_stats == True:
