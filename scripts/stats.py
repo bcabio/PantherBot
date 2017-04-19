@@ -12,6 +12,7 @@ import requests
 #top_users random --emoji :( Default index is stuck at 3. Should change to 10
 #top_users random 10 --emoji :)
 engine = create_engine('mysql://{}:{}@{}'.format(os.environ["DB_USERNAME"], os.environ["DB_PASSWORD"], os.environ["DB_CONNECTION_STRING"]), echo=False)
+
 def stats(response, args):
     if args[0] == 'time':
         if len(args)!=4:
@@ -19,22 +20,19 @@ def stats(response, args):
         return generate_time_graph(args[2::], args[1])
 
     if args[0] == 'top_users':
+        emoji_stats = False
+        channel = args[1]
+        index = 10
         try:
-            emoji_stats = False
-            channel = args[1]
-            index = 10
-            try:
-                index = int(args[2])
-                if args[-1] == "--emoji":
-                    emoji_stats = True
-            except ValueError:
-                if args[2] == "--emoji":
-                    emoji_stats = True
-                else:
-                    return ["Please stop being stupid"]
+            index = int(args[2])
+            if args[-1] == "--emoji":
+                emoji_stats = True
+        except ValueError:
+            if args[2] == "--emoji":
+                emoji_stats = True
+            else:
+                return ["Please stop being stupid"]
 
-        except Exception as e:
-            print e
         return collect_top_users(index, channel, emoji_stats)
 
         pass
