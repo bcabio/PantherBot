@@ -23,6 +23,8 @@ def stats(response, args):
         emoji_stats = False
         channel = args[1]
         index = 10
+        if len(args)>4:
+            return ["ERROR: Please use the following syntax `top_users <channel> <index> (--emoji)`"]
         try:
             index = int(args[2])
             if args[-1] == "--emoji":
