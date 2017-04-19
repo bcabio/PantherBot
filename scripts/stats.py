@@ -118,9 +118,11 @@ def collect_top_users(index, channel, get_emoji_stats):
 
             with PdfPages(filepath+file_name) as pdf:
 
-                giver_bar_graph = giver_df.plot(x='Top Givers', y='Score',kind='barh', legend=False, title='Emoji Givers')
+                giver_bar_graph = giver_df.plot(x='Top Givers', y='Score', kind='barh', legend=False, title='Emoji Givers')
                 giver_bar_graph.set_xlabel('Users')
                 giver_bar_graph.set_ylabel('Score')
+                # for c in giver_bar_graph.patches:
+                #     giver_bar_graph.annotate(() ,str(c.get_hieght))
                 plt.tight_layout()
                 pdf.savefig()
                 plt.close()
@@ -132,8 +134,9 @@ def collect_top_users(index, channel, get_emoji_stats):
                 pdf.savefig()
                 plt.close()
 
+            upload_to_slack(filepath+file_name, file_name, 'pdf')
+
         else:
-            print 2
             top_users = engine.execute("""SELECT first_name, last_name, topCommenters.comment_count 
                 FROM (
                     SELECT from_user_id, comment_count 
@@ -157,7 +160,7 @@ def upload_to_slack(filepath, file_name, file_type):
     print 'PantherBot:LOG:Beginning file upload to Slack'
     my_file = {'file' : (file_name, open(filepath, 'rb'), file_type)}
     payload={
-              "filename":"myfile.pdf", 
+              "filename": file_name, 
               "token":"xoxp-112432628209-170519375364-170581262869-d9c68a368b1865babe1b09ea8d6ca309", 
               "channels":['#random'], 
             }
