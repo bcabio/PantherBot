@@ -129,8 +129,6 @@ def collect_top_users(index, channel, get_emoji_stats):
                 ORDER BY totalReceived ASC limit %s""", 
                 channel, index).fetchall()
 
-        print len(top_given)
-        print len(top_received)
         received_names = [x[0]+" "+x[1] for x in top_given]
         received_scores = [int(x[2]) for x in top_given]
         giver_names = [x[0]+" "+x[1] for x in top_received]
