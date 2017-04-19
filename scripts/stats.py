@@ -33,8 +33,7 @@ def stats(response, args):
             if args[2] == "--emoji":
                 emoji_stats = True
             else:
-                return ["Please stop being stupid"]
-
+                return ["ERROR: Please use the following syntax `top_users <channel> <index> (--emoji)`"]
         return collect_top_users(index, channel, emoji_stats)
 
         pass
