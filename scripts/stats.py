@@ -81,29 +81,47 @@ def generate_time_graph(range, channel='all'):
 
 def collect_top_users(index, channel, get_emoji_stats):
     if get_emoji_stats == True:
-        top_given = engine.execute("""SELECT u.first_name, u.last_name, SUM(ea.given_count) totalGiven 
-            FROM emojiActivity ea 
-            JOIN users u 
-            ON ea.from_user_id = u.slack_id 
-            WHERE ea.in_channel_id = (
-                SELECT slack_id 
-                FROM channels 
-                WHERE name = %s) 
-            GROUP BY u.first_name, u.last_name 
-            ORDER BY totalGiven ASC limit %s""", 
-            channel, index).fetchall()
 
-        top_received = engine.execute("""SELECT u.first_name, u.last_name, SUM(ea.given_count) totalReceived 
-            FROM emojiActivity ea 
-            JOIN users u 
-            ON ea.to_user_id = u.slack_id 
-            WHERE ea.in_channel_id = (
-                SELECT slack_id 
-                FROM channels 
-                WHERE name = %s) 
-            GROUP BY u.first_name, u.last_name 
-            ORDER BY totalReceived ASC limit %s""", 
-            channel, index).fetchall()
+        if channel == 'all':
+            top_given = engine.execute("""SELECT u.first_name, u.last_name, SUM(ea.given_count) totalGiven 
+                FROM emojiActivity ea 
+                JOIN users u 
+                ON ea.from_user_id = u.slack_id  
+                GROUP BY u.first_name, u.last_name 
+                ORDER BY totalGiven ASC limit %s""", 
+                index).fetchall()
+
+            top_received = engine.execute("""SELECT u.first_name, u.last_name, SUM(ea.given_count) totalReceived 
+                FROM emojiActivity ea 
+                JOIN users u 
+                ON ea.to_user_id = u.slack_id  
+                GROUP BY u.first_name, u.last_name 
+                ORDER BY totalReceived ASC limit %s""", 
+                index).fetchall()
+        else:
+            top_given = engine.execute("""SELECT u.first_name, u.last_name, SUM(ea.given_count) totalGiven 
+                FROM emojiActivity ea 
+                JOIN users u 
+                ON ea.from_user_id = u.slack_id 
+                WHERE ea.in_channel_id = (
+                    SELECT slack_id 
+                    FROM channels 
+                    WHERE name = %s) 
+                GROUP BY u.first_name, u.last_name 
+                ORDER BY totalGiven ASC limit %s""", 
+                channel, index).fetchall()
+
+            top_received = engine.execute("""SELECT u.first_name, u.last_name, SUM(ea.given_count) totalReceived 
+                FROM emojiActivity ea 
+                JOIN users u 
+                ON ea.to_user_id = u.slack_id 
+                WHERE ea.in_channel_id = (
+                    SELECT slack_id 
+                    FROM channels 
+                    WHERE name = %s) 
+                GROUP BY u.first_name, u.last_name 
+                ORDER BY totalReceived ASC limit %s""", 
+                channel, index).fetchall()
 
         received_names = [x[0]+" "+x[1] for x in top_given]
         received_scores = [int(x[2]) for x in top_given]
