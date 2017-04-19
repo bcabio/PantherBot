@@ -139,8 +139,6 @@ def collect_top_users(index, channel, get_emoji_stats):
             giver_bar_graph = giver_df.plot(x='Top Givers', y='Score', kind='barh', legend=False, title='Emoji Givers')
             giver_bar_graph.set_xlabel('Users')
             giver_bar_graph.set_ylabel('Score')
-            # for c in giver_bar_graph.patches:
-            #     giver_bar_graph.annotate(() ,str(c.get_hieght))
             plt.tight_layout()
             pdf.savefig()
             plt.close()
