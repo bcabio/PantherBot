@@ -2,7 +2,9 @@ import datetime
 import pandas
 import matplotlib.pyplot as plt
 from collections import Counter
+from matplotlib.backends.backend_pdf import PdfPages
 from sqlalchemy import create_engine
+import time
 import os
 import requests
 #top_users random 10 :)
@@ -80,7 +82,6 @@ def generate_time_graph(range, channel='all'):
 def collect_top_users(index, channel, get_emoji_stats):
     try:
         if get_emoji_stats == True:
-            print 1
             top_given = engine.execute("""SELECT u.first_name, u.last_name, SUM(ea.given_count) totalGiven 
                 FROM emojiActivity ea 
                 JOIN users u 
@@ -105,22 +106,32 @@ def collect_top_users(index, channel, get_emoji_stats):
                 ORDER BY totalReceived ASC limit %s""", 
                 channel, index).fetchall()
 
-            print top_given
             received_names = [x[0]+" "+x[1] for x in top_given]
             received_scores = [int(x[2]) for x in top_given]
-            given_names = [x[0]+" "+x[1] for x in top_given]
-            given_scores = [int(x[2]) for x in top_given]
+            giver_names = [x[0]+" "+x[1] for x in top_received]
+            giver_scores = [int(x[2]) for x in top_received]
 
-            print str(len(received_names))+" "+str(len(given_names))
+            giver_df = pandas.DataFrame({'Top Givers':giver_names, 'Score':giver_scores})
+            received_df = pandas.DataFrame({'Top Receivers':received_names, "Score":received_scores})
+            filepath = '/tmp/'
+            file_name = 'Emoji_Bar_Graph_'+time.strftime('%m-%d-%Y')+'.pdf'
 
-            given_df = pandas.DataFrame({'Top Givers':given_names, 'Score':given_scores})
-            received_df = pandas.DataFrame({'Top Receivers':received_names, "rScore":received_scores})
-            
-            bar_graph = given_df.plot(x='Top Givers', y='Score', kind='barh', legend=False, title='SomeTitle')
-            bar_graph.set_xlabel('Users')
-            bar_graph.set_ylabel('Score')
-            plt.tight_layout()
-            plt.savefig('/tmp/myfile.pdf')
+            with PdfPages(filepath+file_name) as pdf:
+
+                giver_bar_graph = giver_df.plot(x='Top Givers', y='Score',kind='barh', legend=False, title='Emoji Givers')
+                giver_bar_graph.set_xlabel('Users')
+                giver_bar_graph.set_ylabel('Score')
+                plt.tight_layout()
+                pdf.savefig()
+                plt.close()
+
+                received_bar_graph = received_df.plot(x='Top Receivers', y='Score', kind='barh', legend=False, title='Emoji Earners')
+                received_bar_graph.set_xlabel('Users')
+                received_bar_graph.set_ylabel('Score')
+                plt.tight_layout()
+                pdf.savefig()
+                plt.close()
+
         else:
             print 2
             top_users = engine.execute("""SELECT first_name, last_name, topCommenters.comment_count 
@@ -138,8 +149,9 @@ def collect_top_users(index, channel, get_emoji_stats):
     except Exception as e:
         print e
 
-    print str(given_df)
-    return [str(given_df)]
+    print str(giver_df)
+    print str(received_df)
+    return [str(giver_df)]
 
 def upload_to_slack(filepath, file_name, file_type):
     print 'PantherBot:LOG:Beginning file upload to Slack'
