@@ -147,7 +147,7 @@ def collect_top_users(index, channel, get_emoji_stats):
                         WHERE name = %s)) as topCommenters 
                 LEFT JOIN users 
                 ON topCommenters.from_user_id = users.slack_id 
-                ORDER BY comment_count desc limit %s""", 
+                ORDER BY comment_count ASC LIMIT %s""", 
                 channel, index).fetchall()
 
             top_users_names = [x[0]+" "+x[1] for x in top_users]
@@ -156,16 +156,14 @@ def collect_top_users(index, channel, get_emoji_stats):
             filepath = '/tmp/'
             file_name = 'Top_Commenters_Bar_Graph_'+channel+'_'+time.strftime('%m-%d-%Y')+'.pdf'
 
-            print str(len(top_users_scores))+' '+str(len(top_users_names))
-
             top_users_df = pandas.DataFrame({'Top Commenters':top_users_names, 'Score':top_users_scores})
-            top_users_bar_graph = top_users_df.plot(x='Top Commenters', y='Scores', kind='barh', legend=False, title='Top Commenters for '+channel)
+            top_users_bar_graph = top_users_df.plot(x='Top Commenters', y='Score', kind='barh', legend=False, title='Top Commenters for '+channel)
             top_users_bar_graph.set_xlabel('Total comments made')
             top_users_bar_graph.set_ylabel('Users')
             plt.tight_layout()
             plt.savefig(filepath+file_name)
 
-            upload_to_slack(filepath, file_name, 'pdf')
+            upload_to_slack(filepath+file_name, file_name, 'pdf')
     except Exception as e:
         print e
 
