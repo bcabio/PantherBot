@@ -114,7 +114,7 @@ def collect_top_users(index, channel, get_emoji_stats):
             giver_df = pandas.DataFrame({'Top Givers':giver_names, 'Score':giver_scores})
             received_df = pandas.DataFrame({'Top Receivers':received_names, "Score":received_scores})
             filepath = '/tmp/'
-            file_name = 'Emoji_Bar_Graph_'+time.strftime('%m-%d-%Y')+'.pdf'
+            file_name = 'Emoji_Bar_Graph_'+channel+'_'+time.strftime('%m-%d-%Y')+'.pdf'
 
             with PdfPages(filepath+file_name) as pdf:
 
@@ -148,13 +148,26 @@ def collect_top_users(index, channel, get_emoji_stats):
                 LEFT JOIN users 
                 ON topCommenters.from_user_id = users.slack_id 
                 ORDER BY comment_count desc limit %s""", 
-                channel, index)
+                channel, index).fetchall()
+
+            top_users_names = [x[0]+" "+x[1] for x in top_users]
+            top_users_scores = [x[2] for x in top_users]
+
+            filepath = '/tmp/'
+            file_name = 'Top_Commenters_Bar_Graph_'+channel+'_'+time.strftime('%m-%d-%Y')+'.pdf'
+
+            print str(len(top_users_scores))+' '+str(len(top_users_names))
+
+            top_users_df = pandas.DataFrame({'Top Commenters':top_users_names, 'Score':top_users_scores})
+            top_users_bar_graph = top_users_df.plot(x='Top Commenters', y='Scores', kind='barh', legend=False, title='Top Commenters for '+channel)
+            top_users_bar_graph.set_xlabel('Total comments made')
+            top_users_bar_graph.set_ylabel('Users')
+            plt.tight_layout()
+            plt.savefig(filepath+file_name)
+
+            upload_to_slack(filepath, file_name, 'pdf')
     except Exception as e:
         print e
-
-    print str(giver_df)
-    print str(received_df)
-    return [str(giver_df)]
 
 def upload_to_slack(filepath, file_name, file_type):
     print 'PantherBot:LOG:Beginning file upload to Slack'
@@ -164,11 +177,9 @@ def upload_to_slack(filepath, file_name, file_type):
               "token":"xoxp-112432628209-170519375364-170581262869-d9c68a368b1865babe1b09ea8d6ca309", 
               "channels":['#random'], 
             }
-
     resp = requests.post("https://slack.com/api/files.upload", params=payload, files=my_file)
-    if resp.text['ok'] == False:
+    if resp.json()['ok'] == False:
         print 'PantherBot:LOG:Upload Failed'
     else:
         print 'PantherBot:LOG:Upload Success'
-
 
