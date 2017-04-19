@@ -11,6 +11,9 @@ import requests
 #top_users all 10 --emoji :) second graph increments by int 5
 #top_users random --emoji :( Default index is stuck at 3. Should change to 10
 #top_users random 10 --emoji :)
+
+#TODO: Change all to slack-wide in code
+#TODO: Change default behavior for no channel to be slack-wide
 engine = create_engine('mysql://{}:{}@{}'.format(os.environ["DB_USERNAME"], os.environ["DB_PASSWORD"], os.environ["DB_CONNECTION_STRING"]), echo=False)
 
 def stats(response, args):
@@ -47,10 +50,18 @@ def stats(response, args):
     if args[0] == 'help':
         return ["""*List of arguments for Stats*
 ```
-time (g_r time random 12/01/15 5/01/17)
+time (!stats time random 12/01/15 5/01/17)
     -- Returns time related data on the channel specified, if none given
     then default is slack-wide.
-    -- Takes 3 arguments: <channel> <begin date> <end date>```
+    -- Takes 3 arguments: <channel> <begin date> <end date>
+
+top_users (!stats top_users random, !stats top_users random 10 --emoji)
+    -- Returns the top commenters of a given channel. `slack-wide` as channel returns
+    slack wide top commenters.
+    -- Optional parameter index specifies how many top users to return.
+    -- Optional flag `--emoji` will return top users for emoji statistics
+    -- Takes max of 3 arguments: <channel> <index> (--emoji
+```
         """]
 
 def generate_time_graph(range, channel='all'):
