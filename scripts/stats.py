@@ -80,92 +80,90 @@ def generate_time_graph(range, channel='all'):
  
 
 def collect_top_users(index, channel, get_emoji_stats):
-    try:
-        if get_emoji_stats == True:
-            top_given = engine.execute("""SELECT u.first_name, u.last_name, SUM(ea.given_count) totalGiven 
-                FROM emojiActivity ea 
-                JOIN users u 
-                ON ea.from_user_id = u.slack_id 
-                WHERE ea.in_channel_id = (
-                    SELECT slack_id 
-                    FROM channels 
-                    WHERE name = %s) 
-                GROUP BY u.first_name, u.last_name 
-                ORDER BY totalGiven ASC limit %s""", 
-                channel, index).fetchall()
+    if get_emoji_stats == True:
+        top_given = engine.execute("""SELECT u.first_name, u.last_name, SUM(ea.given_count) totalGiven 
+            FROM emojiActivity ea 
+            JOIN users u 
+            ON ea.from_user_id = u.slack_id 
+            WHERE ea.in_channel_id = (
+                SELECT slack_id 
+                FROM channels 
+                WHERE name = %s) 
+            GROUP BY u.first_name, u.last_name 
+            ORDER BY totalGiven ASC limit %s""", 
+            channel, index).fetchall()
 
-            top_received = engine.execute("""SELECT u.first_name, u.last_name, SUM(ea.given_count) totalReceived 
-                FROM emojiActivity ea 
-                JOIN users u 
-                ON ea.to_user_id = u.slack_id 
-                WHERE ea.in_channel_id = (
-                    SELECT slack_id 
-                    FROM channels 
-                    WHERE name = %s) 
-                GROUP BY u.first_name, u.last_name 
-                ORDER BY totalReceived ASC limit %s""", 
-                channel, index).fetchall()
+        top_received = engine.execute("""SELECT u.first_name, u.last_name, SUM(ea.given_count) totalReceived 
+            FROM emojiActivity ea 
+            JOIN users u 
+            ON ea.to_user_id = u.slack_id 
+            WHERE ea.in_channel_id = (
+                SELECT slack_id 
+                FROM channels 
+                WHERE name = %s) 
+            GROUP BY u.first_name, u.last_name 
+            ORDER BY totalReceived ASC limit %s""", 
+            channel, index).fetchall()
 
-            received_names = [x[0]+" "+x[1] for x in top_given]
-            received_scores = [int(x[2]) for x in top_given]
-            giver_names = [x[0]+" "+x[1] for x in top_received]
-            giver_scores = [int(x[2]) for x in top_received]
+        received_names = [x[0]+" "+x[1] for x in top_given]
+        received_scores = [int(x[2]) for x in top_given]
+        giver_names = [x[0]+" "+x[1] for x in top_received]
+        giver_scores = [int(x[2]) for x in top_received]
 
-            giver_df = pandas.DataFrame({'Top Givers':giver_names, 'Score':giver_scores})
-            received_df = pandas.DataFrame({'Top Receivers':received_names, "Score":received_scores})
-            filepath = '/tmp/'
-            file_name = 'Emoji_Bar_Graph_'+channel+'_'+time.strftime('%m-%d-%Y')+'.pdf'
+        giver_df = pandas.DataFrame({'Top Givers':giver_names, 'Score':giver_scores})
+        received_df = pandas.DataFrame({'Top Receivers':received_names, "Score":received_scores})
+        filepath = '/tmp/'
+        file_name = 'Emoji_Bar_Graph_'+channel+'_'+time.strftime('%m-%d-%Y')+'.pdf'
 
-            with PdfPages(filepath+file_name) as pdf:
+        with PdfPages(filepath+file_name) as pdf:
 
-                giver_bar_graph = giver_df.plot(x='Top Givers', y='Score', kind='barh', legend=False, title='Emoji Givers')
-                giver_bar_graph.set_xlabel('Users')
-                giver_bar_graph.set_ylabel('Score')
-                # for c in giver_bar_graph.patches:
-                #     giver_bar_graph.annotate(() ,str(c.get_hieght))
-                plt.tight_layout()
-                pdf.savefig()
-                plt.close()
-
-                received_bar_graph = received_df.plot(x='Top Receivers', y='Score', kind='barh', legend=False, title='Emoji Earners')
-                received_bar_graph.set_xlabel('Users')
-                received_bar_graph.set_ylabel('Score')
-                plt.tight_layout()
-                pdf.savefig()
-                plt.close()
-
-            upload_to_slack(filepath+file_name, file_name, 'pdf')
-
-        else:
-            top_users = engine.execute("""SELECT first_name, last_name, topCommenters.comment_count 
-                FROM (
-                    SELECT from_user_id, comment_count 
-                    FROM commentActivity 
-                    WHERE to_channel_id = (
-                        SELECT slack_id 
-                        FROM channels 
-                        WHERE name = %s)) as topCommenters 
-                LEFT JOIN users 
-                ON topCommenters.from_user_id = users.slack_id 
-                ORDER BY comment_count ASC LIMIT %s""", 
-                channel, index).fetchall()
-
-            top_users_names = [x[0]+" "+x[1] for x in top_users]
-            top_users_scores = [x[2] for x in top_users]
-
-            filepath = '/tmp/'
-            file_name = 'Top_Commenters_Bar_Graph_'+channel+'_'+time.strftime('%m-%d-%Y')+'.pdf'
-
-            top_users_df = pandas.DataFrame({'Top Commenters':top_users_names, 'Score':top_users_scores})
-            top_users_bar_graph = top_users_df.plot(x='Top Commenters', y='Score', kind='barh', legend=False, title='Top Commenters for '+channel)
-            top_users_bar_graph.set_xlabel('Total comments made')
-            top_users_bar_graph.set_ylabel('Users')
+            giver_bar_graph = giver_df.plot(x='Top Givers', y='Score', kind='barh', legend=False, title='Emoji Givers')
+            giver_bar_graph.set_xlabel('Users')
+            giver_bar_graph.set_ylabel('Score')
+            # for c in giver_bar_graph.patches:
+            #     giver_bar_graph.annotate(() ,str(c.get_hieght))
             plt.tight_layout()
-            plt.savefig(filepath+file_name)
+            pdf.savefig()
+            plt.close()
 
-            upload_to_slack(filepath+file_name, file_name, 'pdf')
-    except Exception as e:
-        print e
+            received_bar_graph = received_df.plot(x='Top Receivers', y='Score', kind='barh', legend=False, title='Emoji Earners')
+            received_bar_graph.set_xlabel('Users')
+            received_bar_graph.set_ylabel('Score')
+            plt.tight_layout()
+            pdf.savefig()
+            plt.close()
+
+        upload_to_slack(filepath+file_name, file_name, 'pdf')
+
+    else:
+        top_users = engine.execute("""SELECT first_name, last_name, topCommenters.comment_count 
+            FROM (
+                SELECT from_user_id, comment_count 
+                FROM commentActivity 
+                WHERE to_channel_id = (
+                    SELECT slack_id 
+                    FROM channels 
+                    WHERE name = %s)) as topCommenters 
+            LEFT JOIN users 
+            ON topCommenters.from_user_id = users.slack_id 
+            ORDER BY comment_count ASC LIMIT %s""", 
+            channel, index).fetchall()
+
+        top_users_names = [x[0]+" "+x[1] for x in top_users]
+        top_users_scores = [x[2] for x in top_users]
+
+        filepath = '/tmp/'
+        file_name = 'Top_Commenters_Bar_Graph_'+channel+'_'+time.strftime('%m-%d-%Y')+'.pdf'
+
+        top_users_df = pandas.DataFrame({'Top Commenters':top_users_names, 'Score':top_users_scores})
+        top_users_bar_graph = top_users_df.plot(x='Top Commenters', y='Score', kind='barh', legend=False, title='Top Commenters for '+channel)
+        top_users_bar_graph.set_xlabel('Total comments made')
+        top_users_bar_graph.set_ylabel('Users')
+        plt.tight_layout()
+        plt.savefig(filepath+file_name)
+
+        upload_to_slack(filepath+file_name, file_name, 'pdf')
+    
 
 def upload_to_slack(filepath, file_name, file_type):
     print 'PantherBot:LOG:Beginning file upload to Slack'
