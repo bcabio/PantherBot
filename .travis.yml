@@ -7,4 +7,4 @@ install:
   - pip install pep8
 # command to run tests
 script: 
-  - "pep8 --statistics -qq ../Pantherbot"
+  - "pep8 --statistics -qq "
