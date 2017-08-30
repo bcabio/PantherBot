@@ -7,4 +7,4 @@ install:
   - pip install pep8
 # command to run tests
 script: 
-  - "pep8 --statistics -qq ./"
+  - "find . -name \*.py -exec pep8 --ignore=E402 {} + | wc -l"
