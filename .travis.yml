@@ -13,9 +13,9 @@ install:
   - "pip install -r requirements.txt"
 # command to run tests
 script: 
-  - $pep8count=`find . -name \*.py -exec pep8 --ignore=E402 {} + | wc -l`
+  - pep8count=`find . -name \*.py -exec pep8 --ignore=E402 {} + | wc -l`
   - |
-      if (($pep8count -ne 0)); then
+      if ((pep8count -ne 0)); then
           find . -name \*.py -exec pep8 --ignore=E402 {} +
           exit 1
       else
