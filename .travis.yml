@@ -17,7 +17,7 @@ script:
     - echo $pep8count
     - |
       if (!($pep8count == 0)); then
-          `find . -name \*.py -exec pep8 --ignore=E402 {} +`
+          `find . -name \*.py -exec pep8 --ignore=E402 {} + | wc -l | cat`
           exit 1
       else
           exit 0
