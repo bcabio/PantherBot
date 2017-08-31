@@ -14,7 +14,7 @@ install:
     # command to run tests
 script: 
     - pep8count=`find . -name \*.py -exec pep8 --ignore=E402 {} + | wc -l`
-    - echo $pep8count
+    # - echo $pep8count
     - |
       if (!($pep8count == 0)); then
             echo 'kek'
