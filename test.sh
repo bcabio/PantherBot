@@ -6,6 +6,6 @@ if [ $pep8count != 0 ];
     	find . -name \*.py -exec pep8 --ignore=E402,E501 {} + 
    		exit 1
     else
-        echo 'All good'
+        echo 'All good here'
         exit 0
     fi
