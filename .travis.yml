@@ -17,8 +17,10 @@ script:
     - echo $pep8count
     - |
       if (!($pep8count == 0)); then
+            echo 'kek'
           exit 1
       else
+          echo 'lol'
           exit 0
       fi
 
