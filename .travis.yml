@@ -16,8 +16,8 @@ script:
     - pep8count=`find . -name \*.py -exec pep8 --ignore=E402 {} + | wc -l`
     # - echo $pep8count
     - |
-      if (!($pep8count == 0)); then
-            echo 'kek'
+      if [ $pep8count != 0 ]; then
+          find . -name \*.py -exec pep8 --ignore=E402,E501 {} +
           exit 1
       else
           echo 'loll'
