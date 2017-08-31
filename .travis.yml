@@ -20,7 +20,7 @@ script:
             echo 'kek'
           exit 1
       else
-          echo 'lol'
+          echo 'loll'
           exit 0
       fi
 
